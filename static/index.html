@@ -8,16 +8,16 @@
     <style>
         body {
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             font-family: system-ui, -apple-system, sans-serif;
-            height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
         }
 
         .hidden-section {
-            margin-bottom: 20px;
+            /* margin-bottom: 20px; */
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -30,45 +30,66 @@
         }
 
         .hidden-section input {
-            padding: 5px;
+            /* padding: 5px; */
         }
 
         .main-container {
-            display: flex;
-            gap: 20px;
             flex: 1;
             min-height: 0;
-        }
-
-        .column {
-            flex: 1;
             display: flex;
             flex-direction: column;
-            min-height: 0;
         }
 
-        .input-section {
-            margin-bottom: 15px;
+        table {
+            width: 100%;
+            height: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        td {
+            /* padding: 10px; */
+            vertical-align: top;
+            width: 50%;
+        }
+
+        .input-row td {
+            height: 115px;
+        }
+
+        .button-row td {
+            /* height: 40px; */
+        }
+
+        .button-row button {
+            width: 100%;
+        }
+
+        .history-row {
+            height: 100%;
         }
 
         .file-input-wrapper {
             position: relative;
             width: 100%;
-            margin-bottom: 5px;
+            height: 100%;
         }
 
         .file-input-display {
             width: 100%;
+            height: 100%;
             padding: 5px;
             border: 1px solid #ccc;
             box-sizing: border-box;
             cursor: pointer;
             background-color: white;
-            min-height: 30px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .file-input-wrapper input[type="file"] {
@@ -83,22 +104,24 @@
 
         textarea {
             width: 100%;
+            height: 100%;
             box-sizing: border-box;
-            resize: vertical;
+            resize: none;
         }
 
         .history {
-            flex: 1;
+            width: 100%;
+            height: 100%;
             overflow-y: auto;
             border: 1px solid #ccc;
-            padding: 10px;
+            /* padding: 10px; */
             box-sizing: border-box;
         }
 
         .history-item {
             border: 1px solid black;
             padding: 10px;
-            margin-bottom: 10px;
+            /* margin-bottom: 10px; */
             cursor: pointer;
             user-select: none;
             -webkit-user-select: none;
@@ -128,6 +151,7 @@
         .status-dot {
             width: 12px;
             height: 12px;
+            margin-right: 5px;
             border-radius: 50%;
             background-color: #999;
         }
@@ -172,24 +196,35 @@
     </div>
 
     <div class="main-container">
-        <div class="column">
-            <div class="input-section">
-                <textarea id="input" rows="5" placeholder="Type or paste content..."></textarea>
-                <button id="submit">Submit</button>
-            </div>
-            <div id="textHistory" class="history"></div>
-        </div>
-
-        <div class="column">
-            <div class="input-section">
-                <div class="file-input-wrapper">
-                    <div id="fileInputDisplay" class="file-input-display">Browse files...</div>
-                    <input type="file" id="fileInput" multiple>
-                </div>
-                <button id="uploadBtn">Upload</button>
-            </div>
-            <div id="fileHistory" class="history"></div>
-        </div>
+        <table>
+            <tr class="input-row">
+                <td>
+                    <textarea id="input" placeholder="Type or paste content..."></textarea>
+                </td>
+                <td>
+                    <div class="file-input-wrapper">
+                        <div id="fileInputDisplay" class="file-input-display">Browse files...</div>
+                        <input type="file" id="fileInput" multiple>
+                    </div>
+                </td>
+            </tr>
+            <tr class="button-row">
+                <td>
+                    <button id="submit">Submit</button>
+                </td>
+                <td>
+                    <button id="uploadBtn">Upload</button>
+                </td>
+            </tr>
+            <tr class="history-row">
+                <td>
+                    <div id="textHistory" class="history"></div>
+                </td>
+                <td>
+                    <div id="fileHistory" class="history"></div>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <script>
