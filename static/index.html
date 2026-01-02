@@ -186,6 +186,33 @@
                 opacity: 0.4;
             }
         }
+
+        .drop-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .drop-overlay.active {
+            display: flex;
+        }
+
+        .drop-message {
+            font-size: 2em;
+            color: white;
+            padding: 40px;
+            border: 3px dashed white;
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
 
@@ -233,6 +260,10 @@
         </table>
     </div>
 
+    <div class="drop-overlay" id="dropOverlay">
+        <div class="drop-message">Drop files here</div>
+    </div>
+
     <script>
         const input = document.getElementById('input');
         const submitBtn = document.getElementById('submit');
@@ -245,7 +276,39 @@
         const textHistoryContainer = document.getElementById('textHistory');
         const fileHistoryContainer = document.getElementById('fileHistory');
         const statusDot = document.getElementById('statusDot');
+        const dropOverlay = document.getElementById('dropOverlay');
         let eventSource = null;
+        let dragCounter = 0;
+
+        window.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            dragCounter++;
+            if (e.dataTransfer.types.includes('Files')) {
+                dropOverlay.classList.add('active');
+            }
+        });
+
+        window.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dragCounter--;
+            if (dragCounter === 0) {
+                dropOverlay.classList.remove('active');
+            }
+        });
+
+        window.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        window.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragCounter = 0;
+            dropOverlay.classList.remove('active');
+
+            if (e.dataTransfer.files.length > 0) {
+                uploadFiles(e.dataTransfer.files);
+            }
+        });
 
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
