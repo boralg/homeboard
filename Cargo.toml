@@ -17,3 +17,4 @@ tokio-stream = "0.1.17"
 tokio-util = { version = "0.7.17", features = ["io"] }
 tower = "0.5.2"
 tower-http = "0.6.8"
+uuid = { version = "1.19.0", features = ["v4"] }

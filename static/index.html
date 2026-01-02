@@ -73,13 +73,13 @@
                 itemDiv.style.marginBottom = '10px';
 
                 const filename = document.createElement('div');
-                filename.textContent = item.filename;
+                filename.textContent = item.display_name;
                 filename.style.marginBottom = '5px';
 
                 const downloadBtn = document.createElement('a');
-                downloadBtn.href = `/files/${item.filename}`;
+                downloadBtn.href = `/files/${item.stored_name}`;
                 downloadBtn.textContent = 'Download';
-                downloadBtn.download = item.filename;
+                downloadBtn.download = item.display_name;
                 downloadBtn.style.marginRight = '10px';
 
                 itemDiv.appendChild(filename);

@@ -35,7 +35,8 @@ struct Content {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct FileInfo {
-    filename: String,
+    display_name: String,
+    stored_name: String,
     timestamp: u64,
 }
 
@@ -58,6 +59,23 @@ struct AppState {
 async fn main() {
     let args = Args::parse();
 
+    if std::path::Path::new(SHARED_DIR).exists() {
+        let has_subdirs = std::fs::read_dir(SHARED_DIR).ok().map_or(false, |entries| {
+            entries
+                .flatten()
+                .any(|e| e.file_type().map_or(false, |t| t.is_dir()))
+        });
+
+        if !has_subdirs {
+            std::fs::remove_dir_all(SHARED_DIR).expect("Failed to clean shared files directory");
+        } else {
+            eprintln!(
+                "Warning: {} contains subdirectories, skipping cleanup",
+                SHARED_DIR
+            );
+        }
+    }
+    
     std::fs::create_dir_all(SHARED_DIR).expect("Failed to create shared files directory");
 
     let (update_tx, _) = broadcast::channel(100);
@@ -152,9 +170,10 @@ async fn upload_handler(
     mut multipart: axum::extract::Multipart,
 ) -> Result<(), StatusCode> {
     while let Ok(Some(mut field)) = multipart.next_field().await {
-        if let Some(filename) = field.file_name() {
-            let filename = filename.to_string();
-            let filepath = Path::new(SHARED_DIR).join(&filename);
+        if let Some(display_name) = field.file_name() {
+            let display_name = display_name.to_string();
+            let stored_name = uuid::Uuid::new_v4().to_string();
+            let filepath = Path::new(SHARED_DIR).join(&stored_name);
 
             let mut file = tokio::fs::File::create(&filepath).await.map_err(|e| {
                 eprintln!("Failed to create file: {}", e);
@@ -174,14 +193,18 @@ async fn upload_handler(
                 .as_secs();
 
             let file_info = FileInfo {
-                filename,
+                display_name,
+                stored_name,
                 timestamp,
             };
 
             let mut file_history = state.file_history.write().await;
             file_history.push_front(file_info);
             if file_history.len() > state.file_history_limit {
-                file_history.pop_back();
+                if let Some(removed) = file_history.pop_back() {
+                    let removed_path = Path::new(SHARED_DIR).join(&removed.stored_name);
+                    let _ = tokio::fs::remove_file(removed_path).await;
+                }
             }
 
             let file_items = file_history.iter().cloned().collect();
@@ -198,12 +221,21 @@ async fn upload_handler(
 }
 
 async fn file_handler(
-    axum::extract::Path(filename): axum::extract::Path<String>,
+    axum::extract::Path(stored_name): axum::extract::Path<String>,
+    State(state): State<AppState>,
 ) -> Result<impl axum::response::IntoResponse, StatusCode> {
     use axum::body::Body;
     use tokio_util::io::ReaderStream;
 
-    let filepath = Path::new(SHARED_DIR).join(&filename);
+    let file_history = state.file_history.read().await;
+    let file_info = file_history
+        .iter()
+        .find(|f| f.stored_name == stored_name)
+        .ok_or(StatusCode::NOT_FOUND)?;
+
+    let display_name = file_info.display_name.clone();
+    let filepath = Path::new(SHARED_DIR).join(&stored_name);
+
     let file = tokio::fs::File::open(&filepath)
         .await
         .map_err(|_| StatusCode::NOT_FOUND)?;
@@ -213,7 +245,7 @@ async fn file_handler(
     Ok((
         [(
             axum::http::header::CONTENT_DISPOSITION,
-            format!("attachment; filename=\"{}\"", filename),
+            format!("attachment; filename=\"{}\"", display_name),
         )],
         body,
     ))
