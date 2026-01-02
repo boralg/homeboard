@@ -5,31 +5,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homeboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: system-ui, -apple-system, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+        .hidden-section {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .hidden-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .hidden-section input {
+            width: 500px;
+            padding: 5px;
+        }
+        .main-container {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+        }
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .input-section {
+            margin-bottom: 15px;
+        }
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        .history {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .history-item {
+            border: 1px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .history-item:hover {
+            background-color: #f0f0f0;
+        }
+        .history-content {
+            max-height: 100px;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+        .status-indicator {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
 </head>
 
 <body>
-    <textarea id="input" rows="10" cols="80" placeholder="Type or paste content..."></textarea>
-    <br>
-    <button id="submit">Submit</button>
+    <div class="hidden-section">
+        <div class="hidden-controls">
+            <input type="password" id="hiddenInput" placeholder="Enter hidden text...">
+            <button id="submitHidden">Submit</button>
+            <button id="copyHidden">Copy</button>
+        </div>
+        <div class="status-indicator">Status: <span id="status">Connecting...</span></div>
+    </div>
 
-    <br><br>
-    <input type="password" id="hiddenInput" placeholder="Enter hidden text..." style="width: 500px;">
-    <br>
-    <button id="submitHidden">Submit</button>
-    <button id="copyHidden">Copy</button>
+    <div class="main-container">
+        <div class="column">
+            <div class="input-section">
+                <textarea id="input" rows="5" placeholder="Type or paste content..."></textarea>
+                <br>
+                <button id="submit">Submit</button>
+            </div>
+            <div id="textHistory" class="history"></div>
+        </div>
 
-    <br><br>
-    <input type="file" id="fileInput" multiple>
-    <button id="uploadBtn">Upload</button>
-
-    <br><br>
-    <div id="textHistory"></div>
-
-    <br>
-    <div id="fileHistory"></div>
-
-    <br>
-    <div>Status: <span id="status">Connecting...</span></div>
+        <div class="column">
+            <div class="input-section">
+                <input type="file" id="fileInput" multiple>
+                <button id="uploadBtn">Upload</button>
+            </div>
+            <div id="fileHistory" class="history"></div>
+        </div>
+    </div>
 
     <script>
         const input = document.getElementById('input');
@@ -48,28 +127,16 @@
             textHistoryContainer.innerHTML = '';
             items.forEach((item) => {
                 const itemDiv = document.createElement('div');
-                itemDiv.style.border = '1px solid black';
-                itemDiv.style.padding = '10px';
-                itemDiv.style.marginBottom = '10px';
-                itemDiv.style.whiteSpace = 'pre-wrap';
-
-                const content = document.createElement('div');
-                content.textContent = item;
-                content.style.marginBottom = '5px';
-                content.style.maxHeight = '100px';
-                content.style.maxWidth = '800px';
-                content.style.overflow = 'hidden';
-                content.style.textOverflow = 'ellipsis';
-                content.style.wordBreak = 'break-word';
-
-                const copyBtn = document.createElement('button');
-                copyBtn.textContent = 'Copy';
-                copyBtn.onclick = () => {
+                itemDiv.className = 'history-item';
+                itemDiv.onclick = () => {
                     navigator.clipboard.writeText(item);
                 };
 
+                const content = document.createElement('div');
+                content.className = 'history-content';
+                content.textContent = item;
+
                 itemDiv.appendChild(content);
-                itemDiv.appendChild(copyBtn);
                 textHistoryContainer.appendChild(itemDiv);
             });
         }
@@ -78,22 +145,19 @@
             fileHistoryContainer.innerHTML = '';
             items.forEach((item) => {
                 const itemDiv = document.createElement('div');
-                itemDiv.style.border = '1px solid black';
-                itemDiv.style.padding = '10px';
-                itemDiv.style.marginBottom = '10px';
+                itemDiv.className = 'history-item';
+                itemDiv.onclick = () => {
+                    const link = document.createElement('a');
+                    link.href = `/files/${item.stored_name}`;
+                    link.download = item.display_name;
+                    link.click();
+                };
 
                 const filename = document.createElement('div');
+                filename.className = 'history-content';
                 filename.textContent = item.display_name;
-                filename.style.marginBottom = '5px';
-
-                const downloadBtn = document.createElement('a');
-                downloadBtn.href = `/files/${item.stored_name}`;
-                downloadBtn.textContent = 'Download';
-                downloadBtn.download = item.display_name;
-                downloadBtn.style.marginRight = '10px';
 
                 itemDiv.appendChild(filename);
-                itemDiv.appendChild(downloadBtn);
                 fileHistoryContainer.appendChild(itemDiv);
             });
         }
