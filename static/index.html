@@ -30,7 +30,6 @@
         }
 
         .hidden-section input {
-            width: 500px;
             padding: 5px;
         }
 
@@ -50,6 +49,36 @@
 
         .input-section {
             margin-bottom: 15px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .file-input-display {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            cursor: pointer;
+            background-color: white;
+            min-height: 30px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            cursor: pointer;
         }
 
         textarea {
@@ -111,7 +140,6 @@
         <div class="column">
             <div class="input-section">
                 <textarea id="input" rows="5" placeholder="Type or paste content..."></textarea>
-                <br>
                 <button id="submit">Submit</button>
             </div>
             <div id="textHistory" class="history"></div>
@@ -119,7 +147,10 @@
 
         <div class="column">
             <div class="input-section">
-                <input type="file" id="fileInput" multiple>
+                <div class="file-input-wrapper">
+                    <div id="fileInputDisplay" class="file-input-display">Browse files...</div>
+                    <input type="file" id="fileInput" multiple>
+                </div>
                 <button id="uploadBtn">Upload</button>
             </div>
             <div id="fileHistory" class="history"></div>
@@ -133,11 +164,21 @@
         const submitHiddenBtn = document.getElementById('submitHidden');
         const copyHiddenBtn = document.getElementById('copyHidden');
         const fileInput = document.getElementById('fileInput');
+        const fileInputDisplay = document.getElementById('fileInputDisplay');
         const uploadBtn = document.getElementById('uploadBtn');
         const textHistoryContainer = document.getElementById('textHistory');
         const fileHistoryContainer = document.getElementById('fileHistory');
         const status = document.getElementById('status');
         let eventSource = null;
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                const fileNames = Array.from(fileInput.files).map(f => f.name).join(', ');
+                fileInputDisplay.textContent = fileNames;
+            } else {
+                fileInputDisplay.textContent = 'Browse files...';
+            }
+        });
 
         function renderTextHistory(items) {
             textHistoryContainer.innerHTML = '';
@@ -244,6 +285,7 @@
             if (files.length > 0) {
                 uploadFiles(files);
                 fileInput.value = '';
+                fileInputDisplay.textContent = 'Browse files...';
             }
         });
 
