@@ -102,10 +102,14 @@ async fn main() {
         .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
-    println!("Server running on http://{}", addr);
+
+    let local_ip = local_ip_address::local_ip()
+        .unwrap_or_else(|_| std::net::IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)));
+
     println!("Text history limit: {}", args.text_history_length);
     println!("File history limit: {}", args.file_history_length);
     println!("Shared files directory: {}", SHARED_DIR);
+    println!("Server running on http://{}:3000", local_ip);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
