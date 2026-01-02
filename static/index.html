@@ -63,12 +63,19 @@
             height: 3em;
         }
 
-        .button-row td {
-            /* height: 40px; */
+        .input-cell {
+            display: flex;
+            height: 100%;
+            /* gap: 5px; */
         }
 
-        .button-row button {
-            width: 100%;
+        .input-cell textarea {
+            flex: 1;
+        }
+
+        .input-cell button {
+            width: 3em;
+
         }
 
         .history-row {
@@ -232,21 +239,16 @@
         <table>
             <tr class="input-row">
                 <td>
-                    <textarea id="input" placeholder="Type or paste content..."></textarea>
+                    <div class="input-cell">
+                        <textarea id="input" placeholder="Type or paste content..."></textarea>
+                        <button id="submit">+</button>
+                    </div>
                 </td>
                 <td>
                     <div class="file-input-wrapper">
                         <div id="fileInputDisplay" class="file-input-display">Browse files...</div>
                         <input type="file" id="fileInput" multiple>
                     </div>
-                </td>
-            </tr>
-            <tr class="button-row">
-                <td>
-                    <button id="submit">Submit</button>
-                </td>
-                <td>
-                    <button id="uploadBtn">Upload</button>
                 </td>
             </tr>
             <tr class="history-row">
@@ -272,7 +274,6 @@
         const copyHiddenBtn = document.getElementById('copyHidden');
         const fileInput = document.getElementById('fileInput');
         const fileInputDisplay = document.getElementById('fileInputDisplay');
-        const uploadBtn = document.getElementById('uploadBtn');
         const textHistoryContainer = document.getElementById('textHistory');
         const fileHistoryContainer = document.getElementById('fileHistory');
         const statusDot = document.getElementById('statusDot');
@@ -312,9 +313,8 @@
 
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
-                const fileNames = Array.from(fileInput.files).map(f => f.name).join(', ');
-                fileInputDisplay.textContent = fileNames;
-            } else {
+                uploadFiles(fileInput.files);
+                fileInput.value = '';
                 fileInputDisplay.textContent = 'Browse files...';
             }
         });
@@ -453,15 +453,6 @@
             if (content) {
                 sendUpdate(content);
                 input.value = '';
-            }
-        });
-
-        uploadBtn.addEventListener('click', () => {
-            const files = fileInput.files;
-            if (files.length > 0) {
-                uploadFiles(files);
-                fileInput.value = '';
-                fileInputDisplay.textContent = 'Browse files...';
             }
         });
 
