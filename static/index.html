@@ -207,15 +207,15 @@
 <body>
     <div class="hidden-section">
         <div class="hidden-controls">
-            <input type="password" id="hiddenInput" placeholder="Enter hidden text...">
-            <button id="submitHidden">Submit</button>
-            <button id="copyHidden">Copy</button>
+            <input type="password" id="hidden-input" placeholder="Enter hidden text...">
+            <button id="submit-hidden">Submit</button>
+            <button id="copy-hidden">Copy</button>
         </div>
         <div class="status-indicator">
-            <div class="status-dot connecting" id="statusDot" title="Connecting..."></div>
+            <div class="status-dot connecting" id="status-dot" title="Connecting..."></div>
         </div>
     </div>
-
+    
     <div class="main-container">
         <table>
             <tr class="input-row">
@@ -227,38 +227,38 @@
                 </td>
                 <td>
                     <div class="file-input-wrapper">
-                        <button id="fileInputDisplay">Browse files...</button>
-                        <input type="file" id="fileInput" multiple>
+                        <button id="file-input-display">Browse files...</button>
+                        <input type="file" id="file-input" multiple>
                     </div>
                 </td>
             </tr>
             <tr class="history-row">
                 <td>
-                    <div id="textHistory" class="history"></div>
+                    <div id="text-history" class="history"></div>
                 </td>
                 <td>
-                    <div id="fileHistory" class="history"></div>
+                    <div id="file-history" class="history"></div>
                 </td>
             </tr>
         </table>
     </div>
 
-    <div class="drop-overlay" id="dropOverlay">
+    <div class="drop-overlay" id="drop-overlay">
         <div class="drop-message">Drop files here</div>
     </div>
 
     <script>
         const input = document.getElementById('input');
         const submitBtn = document.getElementById('submit');
-        const hiddenInput = document.getElementById('hiddenInput');
-        const submitHiddenBtn = document.getElementById('submitHidden');
-        const copyHiddenBtn = document.getElementById('copyHidden');
-        const fileInput = document.getElementById('fileInput');
-        const fileInputDisplay = document.getElementById('fileInputDisplay');
-        const textHistoryContainer = document.getElementById('textHistory');
-        const fileHistoryContainer = document.getElementById('fileHistory');
-        const statusDot = document.getElementById('statusDot');
-        const dropOverlay = document.getElementById('dropOverlay');
+        const hiddenInput = document.getElementById('hidden-input');
+        const submitHiddenBtn = document.getElementById('submit-hidden');
+        const copyHiddenBtn = document.getElementById('copy-hidden');
+        const fileInput = document.getElementById('file-input');
+        const fileInputDisplay = document.getElementById('file-input-display');
+        const textHistoryContainer = document.getElementById('text-history');
+        const fileHistoryContainer = document.getElementById('file-history');
+        const statusDot = document.getElementById('status-dot');
+        const dropOverlay = document.getElementById('drop-overlay');
         let eventSource = null;
         let dragCounter = 0;
 
