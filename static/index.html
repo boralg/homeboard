@@ -8,31 +8,24 @@
 </head>
 
 <body>
-    <h1>Homeboard</h1>
-
-    <h2>Text</h2>
     <textarea id="input" rows="10" cols="80" placeholder="Type or paste content..."></textarea>
     <br>
     <button id="submit">Submit</button>
 
     <br><br>
-    <h2>Hidden Text</h2>
     <input type="password" id="hiddenInput" placeholder="Enter hidden text..." style="width: 500px;">
     <br>
     <button id="submitHidden">Submit</button>
     <button id="copyHidden">Copy</button>
 
     <br><br>
-    <h2>Files</h2>
     <input type="file" id="fileInput" multiple>
     <button id="uploadBtn">Upload</button>
 
     <br><br>
-    <h2>Text History</h2>
     <div id="textHistory"></div>
 
     <br>
-    <h2>File History</h2>
     <div id="fileHistory"></div>
 
     <br>
@@ -63,6 +56,11 @@
                 const content = document.createElement('div');
                 content.textContent = item;
                 content.style.marginBottom = '5px';
+                content.style.maxHeight = '100px';
+                content.style.maxWidth = '800px';
+                content.style.overflow = 'hidden';
+                content.style.textOverflow = 'ellipsis';
+                content.style.wordBreak = 'break-word';
 
                 const copyBtn = document.createElement('button');
                 copyBtn.textContent = 'Copy';
