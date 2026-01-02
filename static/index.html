@@ -15,41 +15,49 @@
             flex-direction: column;
             box-sizing: border-box;
         }
+
         .hidden-section {
             margin-bottom: 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
+
         .hidden-controls {
             display: flex;
             align-items: center;
             gap: 5px;
         }
+
         .hidden-section input {
             width: 500px;
             padding: 5px;
         }
+
         .main-container {
             display: flex;
             gap: 20px;
             flex: 1;
             min-height: 0;
         }
+
         .column {
             flex: 1;
             display: flex;
             flex-direction: column;
             min-height: 0;
         }
+
         .input-section {
             margin-bottom: 15px;
         }
+
         textarea {
             width: 100%;
             box-sizing: border-box;
             resize: vertical;
         }
+
         .history {
             flex: 1;
             overflow-y: auto;
@@ -57,15 +65,22 @@
             padding: 10px;
             box-sizing: border-box;
         }
+
         .history-item {
             border: 1px solid black;
             padding: 10px;
             margin-bottom: 10px;
             cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
+
         .history-item:hover {
             background-color: #f0f0f0;
         }
+
         .history-content {
             max-height: 100px;
             max-width: 100%;
@@ -74,6 +89,7 @@
             word-break: break-word;
             white-space: pre-wrap;
         }
+
         .status-indicator {
             font-size: 14px;
             color: #666;
