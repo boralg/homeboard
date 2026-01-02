@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homeboard</title>
+</head>
+<body>
+    <h1>Homeboard</h1>
+    <textarea id="content" rows="20" cols="80" placeholder="Start typing..."></textarea>
+    <div>Status: <span id="status">Connecting...</span></div>
+
+    <script>
+        const textarea = document.getElementById('content');
+        const status = document.getElementById('status');
+        let eventSource = null;
+        let isUpdatingFromServer = false;
+        let debounceTimer = null;
+
+        function connectSSE() {
+            eventSource = new EventSource('/events');
+
+            eventSource.onopen = () => {
+                status.textContent = 'Connected';
+            };
+
+            eventSource.addEventListener('update', (event) => {
+                const data = JSON.parse(event.data);
+                if (data.content !== textarea.value) {
+                    isUpdatingFromServer = true;
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    textarea.value = data.content;
+
+                    if (start <= data.content.length) {
+                        textarea.setSelectionRange(start, end);
+                    }
+                    isUpdatingFromServer = false;
+                }
+            });
+
+            eventSource.onerror = () => {
+                status.textContent = 'Disconnected';
+                eventSource.close();
+                setTimeout(connectSSE, 3000);
+            };
+        }
+
+        async function sendUpdate(content) {
+            try {
+                await fetch('/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content }),
+                });
+            } catch (error) {
+                console.error('Failed to send update:', error);
+            }
+        }
+
+        textarea.addEventListener('input', () => {
+            if (isUpdatingFromServer) return;
+
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                sendUpdate(textarea.value);
+            }, 300);
+        });
+
+        connectSSE();
+    </script>
+</body>
+</html>

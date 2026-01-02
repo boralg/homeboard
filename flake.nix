@@ -24,9 +24,10 @@
           let
             toolchainPackages =
               fenixPkgs: crossFenixPkgs: with fenixPkgs; [
-                latest.rustfmt
-                latest.cargo
-                latest.rust-src
+                stable.rustfmt
+                stable.rustc
+                stable.cargo
+                crossFenixPkgs.stable.rust-src
               ];
           in
           [
