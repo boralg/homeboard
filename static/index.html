@@ -7,15 +7,46 @@
 </head>
 <body>
     <h1>Homeboard</h1>
-    <textarea id="content" rows="20" cols="80" placeholder="Start typing..."></textarea>
+    <textarea id="input" rows="10" cols="80" placeholder="Type or paste content..."></textarea>
+    <br>
+    <button id="submit">Submit</button>
+    <br><br>
+    <h2>History</h2>
+    <div id="history"></div>
+    <br>
     <div>Status: <span id="status">Connecting...</span></div>
 
     <script>
-        const textarea = document.getElementById('content');
+        const input = document.getElementById('input');
+        const submitBtn = document.getElementById('submit');
+        const historyContainer = document.getElementById('history');
         const status = document.getElementById('status');
         let eventSource = null;
-        let isUpdatingFromServer = false;
-        let debounceTimer = null;
+
+        function renderHistory(items) {
+            historyContainer.innerHTML = '';
+            items.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.style.border = '1px solid black';
+                itemDiv.style.padding = '10px';
+                itemDiv.style.marginBottom = '10px';
+                itemDiv.style.whiteSpace = 'pre-wrap';
+
+                const content = document.createElement('div');
+                content.textContent = item;
+                content.style.marginBottom = '5px';
+
+                const copyBtn = document.createElement('button');
+                copyBtn.textContent = 'Copy';
+                copyBtn.onclick = () => {
+                    navigator.clipboard.writeText(item);
+                };
+
+                itemDiv.appendChild(content);
+                itemDiv.appendChild(copyBtn);
+                historyContainer.appendChild(itemDiv);
+            });
+        }
 
         function connectSSE() {
             eventSource = new EventSource('/events');
@@ -26,17 +57,7 @@
 
             eventSource.addEventListener('update', (event) => {
                 const data = JSON.parse(event.data);
-                if (data.content !== textarea.value) {
-                    isUpdatingFromServer = true;
-                    const start = textarea.selectionStart;
-                    const end = textarea.selectionEnd;
-                    textarea.value = data.content;
-
-                    if (start <= data.content.length) {
-                        textarea.setSelectionRange(start, end);
-                    }
-                    isUpdatingFromServer = false;
-                }
+                renderHistory(data.items);
             });
 
             eventSource.onerror = () => {
@@ -60,13 +81,12 @@
             }
         }
 
-        textarea.addEventListener('input', () => {
-            if (isUpdatingFromServer) return;
-
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                sendUpdate(textarea.value);
-            }, 300);
+        submitBtn.addEventListener('click', () => {
+            const content = input.value;
+            if (content) {
+                sendUpdate(content);
+                input.value = '';
+            }
         });
 
         connectSSE();

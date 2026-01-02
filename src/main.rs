@@ -6,29 +6,44 @@ use axum::{
     response::{Html, Sse, sse::Event},
     routing::{get, post},
 };
+use clap::Parser;
 use futures::stream::{self, Stream};
 use serde::{Deserialize, Serialize};
-use std::{convert::Infallible, net::SocketAddr, sync::Arc, time::Duration};
+use std::{collections::VecDeque, convert::Infallible, net::SocketAddr, sync::Arc, time::Duration};
 use tokio::sync::{RwLock, broadcast};
 use tokio_stream::StreamExt as _;
+
+#[derive(Parser)]
+struct Args {
+    #[arg(short = 't', long, default_value_t = 20)]
+    history: usize,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct Content {
     content: String,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+struct History {
+    items: Vec<String>,
+}
+
 #[derive(Clone)]
 struct AppState {
-    content: Arc<RwLock<String>>,
-    update_tx: Arc<broadcast::Sender<String>>,
+    history: Arc<RwLock<VecDeque<String>>>,
+    history_limit: usize,
+    update_tx: Arc<broadcast::Sender<History>>,
 }
 
 #[tokio::main]
 async fn main() {
+    let args = Args::parse();
     let (update_tx, _) = broadcast::channel(100);
 
     let state = AppState {
-        content: Arc::new(RwLock::new(String::new())),
+        history: Arc::new(RwLock::new(VecDeque::new())),
+        history_limit: args.history,
         update_tx: Arc::new(update_tx),
     };
 
@@ -40,6 +55,7 @@ async fn main() {
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     println!("Server running on http://{}", addr);
+    println!("History limit: {}", args.history);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
@@ -54,21 +70,21 @@ async fn sse_handler(
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     let mut rx = state.update_tx.subscribe();
 
-    let current_content = state.content.read().await.clone();
+    let current_history = state.history.read().await.iter().cloned().collect();
     let initial_event = stream::once(async move {
         Ok(Event::default()
             .event("update")
-            .json_data(Content {
-                content: current_content,
+            .json_data(History {
+                items: current_history,
             })
             .unwrap())
     });
 
     let update_stream = async_stream::stream! {
-        while let Ok(content) = rx.recv().await {
+        while let Ok(history) = rx.recv().await {
             yield Ok(Event::default()
                 .event("update")
-                .json_data(Content { content })
+                .json_data(history)
                 .unwrap());
         }
     };
@@ -82,11 +98,16 @@ async fn sse_handler(
     )
 }
 
-async fn update_handler(State(state): State<AppState>, Json(payload): Json<Content>) -> Json<()> {
-    let mut content = state.content.write().await;
-    *content = payload.content.clone();
+async fn update_handler(State(state): State<AppState>, Json(payload): Json<Content>) {
+    let mut history = state.history.write().await;
 
-    let _ = state.update_tx.send(payload.content);
+    if !payload.content.is_empty() {
+        history.push_front(payload.content);
+        if history.len() > state.history_limit {
+            history.pop_back();
+        }
+    }
 
-    Json(())
+    let history_vec: Vec<String> = history.iter().cloned().collect();
+    let _ = state.update_tx.send(History { items: history_vec });
 }
