@@ -1,5 +1,5 @@
 {
-  description = "Content sharing on local network";
+  description = "LAN clipboard";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
