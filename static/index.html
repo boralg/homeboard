@@ -120,8 +120,41 @@
         }
 
         .status-indicator {
-            font-size: 14px;
-            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #999;
+        }
+
+        .status-dot.connected {
+            background-color: #4CAF50;
+        }
+
+        .status-dot.connecting {
+            background-color: #FFC107;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .status-dot.disconnected {
+            background-color: #F44336;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
         }
     </style>
 </head>
@@ -133,7 +166,9 @@
             <button id="submitHidden">Submit</button>
             <button id="copyHidden">Copy</button>
         </div>
-        <div class="status-indicator">Status: <span id="status">Connecting...</span></div>
+        <div class="status-indicator">
+            <div class="status-dot connecting" id="statusDot" title="Connecting..."></div>
+        </div>
     </div>
 
     <div class="main-container">
@@ -168,7 +203,7 @@
         const uploadBtn = document.getElementById('uploadBtn');
         const textHistoryContainer = document.getElementById('textHistory');
         const fileHistoryContainer = document.getElementById('fileHistory');
-        const status = document.getElementById('status');
+        const statusDot = document.getElementById('statusDot');
         let eventSource = null;
 
         fileInput.addEventListener('change', () => {
@@ -223,7 +258,8 @@
             eventSource = new EventSource('/events');
 
             eventSource.onopen = () => {
-                status.textContent = 'Connected';
+                statusDot.className = 'status-dot connected';
+                statusDot.title = 'Connected';
             };
 
             eventSource.addEventListener('update', (event) => {
@@ -233,9 +269,14 @@
             });
 
             eventSource.onerror = () => {
-                status.textContent = 'Disconnected';
+                statusDot.className = 'status-dot disconnected';
+                statusDot.title = 'Disconnected';
                 eventSource.close();
-                setTimeout(connectSSE, 3000);
+                setTimeout(() => {
+                    statusDot.className = 'status-dot connecting';
+                    statusDot.title = 'Connecting...';
+                    connectSSE();
+                }, 3000);
             };
         }
 
