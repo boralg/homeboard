@@ -7,25 +7,41 @@
 </head>
 <body>
     <h1>Homeboard</h1>
+
+    <h2>Text</h2>
     <textarea id="input" rows="10" cols="80" placeholder="Type or paste content..."></textarea>
     <br>
     <button id="submit">Submit</button>
+
     <br><br>
-    <h2>History</h2>
-    <div id="history"></div>
+    <h2>Files</h2>
+    <input type="file" id="fileInput" multiple>
+    <button id="uploadBtn">Upload</button>
+
+    <br><br>
+    <h2>Text History</h2>
+    <div id="textHistory"></div>
+
+    <br>
+    <h2>File History</h2>
+    <div id="fileHistory"></div>
+
     <br>
     <div>Status: <span id="status">Connecting...</span></div>
 
     <script>
         const input = document.getElementById('input');
         const submitBtn = document.getElementById('submit');
-        const historyContainer = document.getElementById('history');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const textHistoryContainer = document.getElementById('textHistory');
+        const fileHistoryContainer = document.getElementById('fileHistory');
         const status = document.getElementById('status');
         let eventSource = null;
 
-        function renderHistory(items) {
-            historyContainer.innerHTML = '';
-            items.forEach((item, index) => {
+        function renderTextHistory(items) {
+            textHistoryContainer.innerHTML = '';
+            items.forEach((item) => {
                 const itemDiv = document.createElement('div');
                 itemDiv.style.border = '1px solid black';
                 itemDiv.style.padding = '10px';
@@ -44,7 +60,31 @@
 
                 itemDiv.appendChild(content);
                 itemDiv.appendChild(copyBtn);
-                historyContainer.appendChild(itemDiv);
+                textHistoryContainer.appendChild(itemDiv);
+            });
+        }
+
+        function renderFileHistory(items) {
+            fileHistoryContainer.innerHTML = '';
+            items.forEach((item) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.style.border = '1px solid black';
+                itemDiv.style.padding = '10px';
+                itemDiv.style.marginBottom = '10px';
+
+                const filename = document.createElement('div');
+                filename.textContent = item.filename;
+                filename.style.marginBottom = '5px';
+
+                const downloadBtn = document.createElement('a');
+                downloadBtn.href = `/files/${item.filename}`;
+                downloadBtn.textContent = 'Download';
+                downloadBtn.download = item.filename;
+                downloadBtn.style.marginRight = '10px';
+
+                itemDiv.appendChild(filename);
+                itemDiv.appendChild(downloadBtn);
+                fileHistoryContainer.appendChild(itemDiv);
             });
         }
 
@@ -57,7 +97,8 @@
 
             eventSource.addEventListener('update', (event) => {
                 const data = JSON.parse(event.data);
-                renderHistory(data.items);
+                renderTextHistory(data.text_items);
+                renderFileHistory(data.file_items);
             });
 
             eventSource.onerror = () => {
@@ -81,11 +122,38 @@
             }
         }
 
+        async function uploadFiles(files) {
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch('/upload', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    if (!response.ok) {
+                        console.error('Upload failed:', response.status, await response.text());
+                    }
+                } catch (error) {
+                    console.error('Failed to upload file:', error);
+                }
+            }
+        }
+
         submitBtn.addEventListener('click', () => {
             const content = input.value;
             if (content) {
                 sendUpdate(content);
                 input.value = '';
+            }
+        });
+
+        uploadBtn.addEventListener('click', () => {
+            const files = fileInput.files;
+            if (files.length > 0) {
+                uploadFiles(files);
+                fileInput.value = '';
             }
         });
 
