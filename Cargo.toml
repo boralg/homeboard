@@ -9,7 +9,6 @@ axum = { version = "0.8.8", features = ["multipart"] }
 clap = { version = "4.5.53", features = ["derive"] }
 futures = "0.3.31"
 local-ip-address = "0.6.8"
-rust-embed = "8.9.0"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.148"
 sha2 = "0.10.9"

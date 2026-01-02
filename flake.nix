@@ -16,10 +16,6 @@
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        buildFilePatterns = [
-          ".*/templates/.*"
-          ".*/assets/.*"
-        ];
         targetPlatforms =
           let
             toolchainPackages =
@@ -43,7 +39,6 @@
                   fi
                 ' sh {} \;
               '';
-              inherit buildFilePatterns;
             }
           ];
         tomersLib = tomers.libFor system targetPlatforms;

@@ -1,5 +1,3 @@
-pub mod data;
-
 use axum::{
     Json, Router,
     extract::State,
