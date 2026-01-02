@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homeboard</title>
 </head>
+
 <body>
     <h1>Homeboard</h1>
 
@@ -12,6 +14,13 @@
     <textarea id="input" rows="10" cols="80" placeholder="Type or paste content..."></textarea>
     <br>
     <button id="submit">Submit</button>
+
+    <br><br>
+    <h2>Hidden Text</h2>
+    <input type="password" id="hiddenInput" placeholder="Enter hidden text..." style="width: 500px;">
+    <br>
+    <button id="submitHidden">Submit</button>
+    <button id="copyHidden">Copy</button>
 
     <br><br>
     <h2>Files</h2>
@@ -32,6 +41,9 @@
     <script>
         const input = document.getElementById('input');
         const submitBtn = document.getElementById('submit');
+        const hiddenInput = document.getElementById('hiddenInput');
+        const submitHiddenBtn = document.getElementById('submitHidden');
+        const copyHiddenBtn = document.getElementById('copyHidden');
         const fileInput = document.getElementById('fileInput');
         const uploadBtn = document.getElementById('uploadBtn');
         const textHistoryContainer = document.getElementById('textHistory');
@@ -157,7 +169,36 @@
             }
         });
 
+        submitHiddenBtn.addEventListener('click', async () => {
+            const content = hiddenInput.value;
+            try {
+                await fetch('/hidden', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content }),
+                });
+                hiddenInput.value = '';
+            } catch (error) {
+                console.error('Failed to submit hidden text:', error);
+            }
+        });
+
+        copyHiddenBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/hidden');
+                const data = await response.json();
+                if (data.content) {
+                    await navigator.clipboard.writeText(data.content);
+                }
+            } catch (error) {
+                console.error('Failed to copy hidden text:', error);
+            }
+        });
+
         connectSSE();
     </script>
 </body>
+
 </html>

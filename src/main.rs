@@ -53,6 +53,7 @@ struct AppState {
     text_history_limit: usize,
     file_history_limit: usize,
     update_tx: Arc<broadcast::Sender<HistoryData>>,
+    hidden_text: Arc<RwLock<Option<String>>>,
 }
 
 #[tokio::main]
@@ -75,7 +76,7 @@ async fn main() {
             );
         }
     }
-    
+
     std::fs::create_dir_all(SHARED_DIR).expect("Failed to create shared files directory");
 
     let (update_tx, _) = broadcast::channel(100);
@@ -86,6 +87,7 @@ async fn main() {
         text_history_limit: args.text_history_length,
         file_history_limit: args.file_history_length,
         update_tx: Arc::new(update_tx),
+        hidden_text: Arc::new(RwLock::new(None)),
     };
 
     let app = Router::new()
@@ -94,6 +96,8 @@ async fn main() {
         .route("/update", post(update_handler))
         .route("/upload", post(upload_handler))
         .route("/files/{filename}", get(file_handler))
+        .route("/hidden", post(set_hidden_handler))
+        .route("/hidden", get(get_hidden_handler))
         .layer(axum::extract::DefaultBodyLimit::disable())
         .with_state(state);
 
@@ -249,4 +253,16 @@ async fn file_handler(
         )],
         body,
     ))
+}
+
+async fn set_hidden_handler(State(state): State<AppState>, Json(payload): Json<Content>) {
+    let mut hidden_text = state.hidden_text.write().await;
+    *hidden_text = Some(payload.content);
+}
+
+async fn get_hidden_handler(State(state): State<AppState>) -> Json<Content> {
+    let hidden_text = state.hidden_text.read().await;
+    Json(Content {
+        content: hidden_text.clone().unwrap_or_default(),
+    })
 }
