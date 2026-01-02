@@ -262,7 +262,7 @@
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'history-item';
                 itemDiv.onclick = () => {
-                    navigator.clipboard.writeText(item);
+                    copyToClipboard(item);
                 };
 
                 const content = document.createElement('div');
@@ -272,6 +272,37 @@
                 itemDiv.appendChild(content);
                 textHistoryContainer.appendChild(itemDiv);
             });
+        }
+
+        function copyToClipboard(text) {
+            const input = document.createElement('input');
+            input.value = text;
+            input.style.position = 'fixed';
+            input.style.opacity = '0';
+            input.style.pointerEvents = 'none';
+
+            document.body.appendChild(input);
+
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+                const range = document.createRange();
+                range.selectNodeContents(input);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                input.setSelectionRange(0, 999999);
+            } else {
+                input.select();
+            }
+
+            let success = false;
+            try {
+                success = document.execCommand('copy');
+            } catch (err) {
+                console.log('Copy failed:', err);
+            }
+
+            document.body.removeChild(input);
+            return success;
         }
 
         function renderFileHistory(items) {
