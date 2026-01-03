@@ -30,7 +30,7 @@ struct Args {
     file_history_length: usize,
     #[arg(short, long, default_value = ".")]
     dir: PathBuf,
-    #[arg(short, long, default_value_t = 3000)]
+    #[arg(short, long, default_value_t = 4663)]
     port: u16,
 }
 
