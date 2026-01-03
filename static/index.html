@@ -215,7 +215,7 @@
             <div class="status-dot connecting" id="status-dot" title="Connecting..."></div>
         </div>
     </div>
-    
+
     <div class="main-container">
         <table>
             <tr class="input-row">
@@ -461,7 +461,7 @@
                 const response = await fetch('/hidden');
                 const data = await response.json();
                 if (data.content) {
-                    await navigator.clipboard.writeText(data.content);
+                    copyToClipboard(data.content);
                 }
             } catch (error) {
                 console.error('Failed to copy hidden text:', error);
