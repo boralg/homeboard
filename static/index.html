@@ -314,7 +314,28 @@
 
                 const content = document.createElement('div');
                 content.className = 'history-content';
-                content.textContent = item;
+
+                let isUrl = false;
+                try {
+                    new URL(item);
+                    isUrl = true;
+                } catch (e) {
+                    isUrl = false;
+                }
+
+                if (isUrl) {
+                    const link = document.createElement('a');
+                    link.href = item;
+                    link.textContent = item;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    link.onclick = (e) => {
+                        e.stopPropagation();
+                    };
+                    content.appendChild(link);
+                } else {
+                    content.textContent = item;
+                }
 
                 itemDiv.appendChild(content);
                 textHistoryContainer.appendChild(itemDiv);
