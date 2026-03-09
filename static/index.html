@@ -461,6 +461,17 @@
             }
         });
 
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                const content = input.value;
+                if (content) {
+                    e.preventDefault();
+                    sendUpdate(content);
+                    input.value = '';
+                }
+            }
+        });
+
         submitHiddenBtn.addEventListener('click', async () => {
             const content = hiddenInput.value;
             try {
