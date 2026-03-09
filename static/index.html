@@ -500,6 +500,27 @@
             }
         });
 
+        window.addEventListener('paste', (e) => {
+            const activeElement = document.activeElement;
+            if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+                return;
+            }
+
+            const clipboardData = e.clipboardData || window.clipboardData;
+
+            if (clipboardData.files && clipboardData.files.length > 0) {
+                e.preventDefault();
+                uploadFiles(clipboardData.files);
+                return;
+            }
+
+            const text = clipboardData.getData('text');
+            if (text) {
+                e.preventDefault();
+                submitText(text);
+            }
+        });
+
         connectSSE();
     </script>
 </body>
