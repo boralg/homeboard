@@ -420,9 +420,9 @@
             };
         }
 
-        async function sendUpdate(content) {
+        async function submitText(content) {
             try {
-                await fetch('/update', {
+                await fetch('/text', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -456,7 +456,7 @@
         submitBtn.addEventListener('click', () => {
             const content = input.value;
             if (content) {
-                sendUpdate(content);
+                submitText(content);
                 input.value = '';
             }
         });
@@ -466,7 +466,7 @@
                 const content = input.value;
                 if (content) {
                     e.preventDefault();
-                    sendUpdate(content);
+                    submitText(content);
                     input.value = '';
                 }
             }

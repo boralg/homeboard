@@ -105,7 +105,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(index_handler))
         .route("/events", get(sse_handler))
-        .route("/update", post(update_handler))
+        .route("/text", post(text_handler))
         .route("/upload", post(upload_handler))
         .route("/files/{filename}", get(file_handler))
         .route("/hidden", post(set_hidden_handler))
@@ -166,7 +166,7 @@ async fn sse_handler(
     )
 }
 
-async fn update_handler(State(state): State<AppState>, Json(payload): Json<Content>) {
+async fn text_handler(State(state): State<AppState>, Json(payload): Json<Content>) {
     let mut text_history = state.text_history.write().await;
 
     if !payload.content.is_empty() {
